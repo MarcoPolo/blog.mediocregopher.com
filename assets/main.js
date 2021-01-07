@@ -19,14 +19,39 @@ var loadQRLib = () => {
 document.addEventListener("DOMContentLoaded", () => {
     console.log("DOM loaded");
 
-    var cryptoDisplay = document.querySelector('#crypto-display');
-    var clearCryptoDisplay = () => {
+    // Get the modal
+    const modal = document.getElementById("modal");
+    const modalContent = document.getElementById("modal-content");
+    const modalClose = document.getElementById("modal-close");
+
+    modalClose.onclick = function() {
+        modal.style.display = "none";
+    }
+
+    const showModal = function() {
+        modalContent.innerHTML = '';
+        for (var i = 0; i < arguments.length; i++) {
+            modalContent.appendChild(arguments[i]);
+        }
+        modal.style.display = "block";
+
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+                window.onclick = "undefined";
+            }
+        }
+    }
+
+    const cryptoDisplay = document.querySelector('#crypto-display');
+    const clearCryptoDisplay = () => {
         cryptoDisplay.innerHTML = '&nbsp;';
     };
 
     console.log("setting up crypto buttons");
     document.querySelectorAll('.crypto').forEach((el) => {
-        var href = el.href;
+        const href = el.href;
         el.href="#";
         el.onclick = () => {
             var parts = href.split(":");
@@ -37,23 +62,12 @@ document.addEventListener("DOMContentLoaded", () => {
             var currency = parts[0];
             var address = parts[1];
 
-            clearCryptoDisplay();
-
             var cryptoDisplayQR = document.createElement('div');
             cryptoDisplayQR.id = "crypto-display-qr";
 
             var cryptoDisplayAddr = document.createElement('div');
             cryptoDisplayAddr.id = "crypto-display-addr";
             cryptoDisplayAddr.innerHTML = '<span>'+currency + " address: " + address + '</span>';
-
-            var cryptoDisplayX = document.createElement('div');
-            cryptoDisplayX.id = "crypto-display-x";
-            cryptoDisplayX.onclick = clearCryptoDisplay;
-            cryptoDisplayX.innerHTML = '<span>X</span>';
-
-            cryptoDisplay.appendChild(cryptoDisplayQR);
-            cryptoDisplay.appendChild(cryptoDisplayAddr);
-            cryptoDisplay.appendChild(cryptoDisplayX);
 
             loadQRLib().then(() => {
                 new QRCode(cryptoDisplayQR, {
@@ -62,6 +76,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     height: 512,
                 });
             });
+
+            showModal(cryptoDisplayQR, cryptoDisplayAddr);
         };
     });
 })
